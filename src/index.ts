@@ -9,6 +9,7 @@ app.use(cors());
 
 app.get("/api", (req: Request, res: Response) => {
   res.status(200).send("Welcome to my API");
+  
 });
 
 const eventRouter = new EventRouter();
