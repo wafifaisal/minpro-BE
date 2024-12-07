@@ -43,10 +43,11 @@ model Event {
   createdAt       DateTime?     @default(now())
   updatedAt       DateTime?     @updatedAt
   category        EventCategory
-  Organizer       Organizer[]
   Ticket          Ticket[]
   Rating          Rating[]
   Order           Order[]
+  Organizer       Organizer?    @relation(fields: [organizerId], references: [id])
+  organizerId     String?
 }
 
 model Ticket {
@@ -67,8 +68,7 @@ model Organizer {
   password String?
   avatar   String?
   isVerify Boolean @default(false)
-  Event    Event?  @relation(fields: [eventId], references: [id])
-  eventId  Int?
+  Event    Event[]
 }
 
 model Rating {
@@ -83,11 +83,6 @@ model Rating {
 
 //------------USER-----------------------
 
-enum Role {
-  User
-  Organizer
-}
-
 enum Status {
   Pending
   Paid
@@ -95,21 +90,18 @@ enum Status {
 }
 
 model User {
-  id           String      @id @default(uuid())
-  first_name   String
-  last_name    String
-  email        String      @unique
-  password     String
-  avatar       String?
-  isVerify     Boolean     @default(false)
-  ref_code     String
-  role         Role
-  Rating       Rating[]
-  UserCoupon   UserCoupon? @relation(fields: [userCouponId], references: [id])
-  userCouponId Int?
-  UserPoint    UserPoint?  @relation(fields: [userPointId], references: [id])
-  userPointId  Int?
-  Order        Order[]
+  id          String       @id @default(uuid())
+  first_name  String
+  last_name   String
+  email       String       @unique
+  password    String
+  avatar      String?
+  isVerify    Boolean      @default(false)
+  ref_code    String
+  Rating      Rating[]
+  User_Coupon UserCoupon[]
+  User_Point  UserPoint[]
+  Order       Order[]
 }
 
 model UserCoupon {
@@ -118,16 +110,18 @@ model UserCoupon {
   percentage Int      @default(10)
   createdAt  DateTime @default(now())
   expiredAt  DateTime
-  UserId     User[]
+  User       User?    @relation(fields: [userId], references: [id])
+  userId     String?
 }
 
 model UserPoint {
   id        Int      @id @default(autoincrement())
   isRedeem  Boolean  @default(false)
-  point     Int
+  point     Int      @default(10000)
   createdAt DateTime @default(now())
   expiredAt DateTime
-  UserId    User[]
+  User      User?    @relation(fields: [userId], references: [id])
+  userId    String?
 }
 
 model Order {
