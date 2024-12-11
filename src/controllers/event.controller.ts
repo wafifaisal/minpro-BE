@@ -1,6 +1,5 @@
 import { Request, Response } from "express";
 import prisma from "../prisma";
-import { EventCategory, Location } from "@prisma/client";
 import { Prisma } from "@prisma/client";
 
 export class EventController {
@@ -20,7 +19,8 @@ export class EventController {
           event_thumbnail: true,
           event_preview: true,
           slug: true,
-          date: true,
+          start_time: true,
+          end_time: true,
           Ticket: {
             select: {
               price: true,
@@ -53,15 +53,25 @@ export class EventController {
           description: true,
           category: true,
           location: true,
-          date: true,
+          start_time: true,
+          end_time: true,
           event_thumbnail: true,
           event_preview: true,
+          slug: true,
+          venue: true,
           Ticket: {
             select: {
               id: true,
               category: true,
+              desc: true,
               price: true,
               seats: true,
+              Order_Details: {
+                select: {
+                  id: true,
+                  quantity: true,
+                },
+              },
             },
           },
           Organizer: {
