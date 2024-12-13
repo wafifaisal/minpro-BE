@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
-import prisma from "../prisma";
-import { Prisma } from "@prisma/client";
+import { PrismaClient, Prisma } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 export class EventController {
   async getEvent(req: Request, res: Response) {
@@ -21,6 +22,8 @@ export class EventController {
           slug: true,
           start_time: true,
           end_time: true,
+          venue: true,
+          location: true,
           Ticket: {
             select: {
               price: true,
