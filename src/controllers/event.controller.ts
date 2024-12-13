@@ -22,6 +22,8 @@ export class EventController {
           slug: true,
           start_time: true,
           end_time: true,
+          venue: true,
+          location: true,
           Ticket: {
             select: {
               price: true,
