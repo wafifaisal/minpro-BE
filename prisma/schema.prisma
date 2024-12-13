@@ -39,6 +39,7 @@ model Event {
   location        Location
   venue           String?
   event_type      EventType
+  isActive        Boolean       @default(true)
   event_thumbnail String?
   event_preview   String?
   createdAt       DateTime?     @default(now())
@@ -127,8 +128,8 @@ model UserPoint {
 
 model Order {
   id            Int             @id @default(autoincrement())
-  total_price   BigInt
-  final_price   BigInt
+  total_price   Int
+  final_price   Int
   status        Status          @default(Pending)
   payment_proof String
   createdAt     DateTime        @default(now())
