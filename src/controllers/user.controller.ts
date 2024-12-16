@@ -9,7 +9,6 @@ export class UserController {
       const filter: Prisma.UserWhereInput = {};
       if (search) {
         filter.OR = [
-          { first_name: { contains: search as string, mode: "insensitive" } },
           { email: { contains: search as string, mode: "insensitive" } },
         ];
       }
