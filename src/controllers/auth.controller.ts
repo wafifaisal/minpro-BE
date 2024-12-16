@@ -6,11 +6,12 @@ import path from "path";
 import fs from "fs";
 import nodemailer from "nodemailer";
 import handlebars from "handlebars";
+import { generateReferralCode } from "../utils/generateReffCode";
 
 export class AuthController {
   async registerUser(req: Request, res: Response) {
     try {
-      const { password, confirmPassword, firstName, lastName, email } = req.body;
+      const { password, confirmPassword, firstName, lastName, email, ref_by } = req.body;
       if (password !== confirmPassword) throw { message: "Passwords do not match!" };
 
       // Check if user exists
@@ -21,7 +22,8 @@ export class AuthController {
 
       const salt = await genSalt(10);
       const hashPassword = await hash(password, salt);
-     
+      const ref_code = generateReferralCode(firstName)
+
       const newUser = await prisma.user.create({
         data: { 
           firstName,
@@ -30,7 +32,7 @@ export class AuthController {
           password: hashPassword,
           avatar: null,
           isVerify: false,
-          ref_code: Math.random().toString(36).substring(7),
+          ref_code,
           ref_by: null
         },
       });
@@ -75,7 +77,7 @@ export class AuthController {
         where: {
           OR: [
             { email: data },
-            { firstName: data }
+            { password: data }
           ]
         }
       });
