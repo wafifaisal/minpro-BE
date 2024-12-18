@@ -57,6 +57,8 @@ model Ticket {
   category      String?
   desc          String?
   seats         Int?
+  start_time    DateTime?
+  end_time      DateTime?
   price         Int
   Order_Details Order_Details[]
   Event         Event?          @relation(fields: [eventId], references: [id])
