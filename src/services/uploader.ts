@@ -17,8 +17,8 @@ export const uploader = (
       ? multer.memoryStorage()
       : multer.diskStorage({
           destination: (
-            req: Request,
-            file: Express.Multer.File,
+            _req: Request,
+            _file: Express.Multer.File,
             cb: DestinationCallback
           ) => {
             const destination = folderName
@@ -27,7 +27,7 @@ export const uploader = (
             cb(null, destination);
           },
           filename: (
-            req: Request,
+            _req: Request,
             file: Express.Multer.File,
             cb: FileNameCallback
           ) => {

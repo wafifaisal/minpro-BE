@@ -24,7 +24,7 @@ export class AuthController {
 
       const newOrganizer = await prisma.organizer.create({
         data: { 
-          organizer_ame,
+          organizer_name,
           email,
           password: hashPassword,
           avatar: null,
