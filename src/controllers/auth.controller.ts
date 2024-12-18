@@ -4,36 +4,36 @@ import { genSalt, hash, compare } from "bcrypt";
 import { sign, verify } from "jsonwebtoken";
 import path from "path";
 import fs from "fs";
+import nodemailer from "nodemailer";
+import handlebars from "handlebars";
+import { generateReferralCode } from "../utils/generateReffCode";
 
 export class AuthController {
   async registerUser(req: Request, res: Response) {
     try {
-      const { password, confirmPassword, username, email } = req.body;
-      if (password != confirmPassword) throw { message: "Password not Match!" };
+      const { password, confirmPassword, firstName, lastName, email, ref_by } = req.body;
+      if (password !== confirmPassword) throw { message: "Passwords do not match!" };
 
       // Check if user exists
       const existingUser = await prisma.user.findFirst({
-        where: {
-          OR: [
-            { first_name: username },
-            { email }
-          ]
-        }
+        where: { email }
       });
-      if (existingUser) throw { message: "Username or email has been used" };
+      if (existingUser) throw { message: "Email has already been used" };
 
       const salt = await genSalt(10);
       const hashPassword = await hash(password, salt);
+      const ref_code = generateReferralCode(firstName)
 
       const newUser = await prisma.user.create({
         data: { 
+          firstName,
+          lastName,
           email,
           password: hashPassword,
-          first_name: username, // Using username as first_name since schema doesn't have username
-          last_name: "",
           avatar: null,
           isVerify: false,
-          ref_code: Math.random().toString(36).substring(7)
+          ref_code,
+          ref_by: null
         },
       });
 
@@ -41,14 +41,12 @@ export class AuthController {
       const token = sign(payload, process.env.JWT_KEY!, { expiresIn: "10m" });
       const link = `http://localhost:3000/verify/${token}`;
 
-      const handlebars = require("handlebars");
       const templatePath = path.join(__dirname, "../templates/verify.hbs");
       const templateSource = fs.readFileSync(templatePath, "utf-8");
       const compiledTemplate = handlebars.compile(templateSource);
-      const html = compiledTemplate({ username, link });
+      const html = compiledTemplate({ firstName, link });
 
-      // Send verification email using nodemailer directly
-      const nodemailer = require("nodemailer");
+      // Send verification email using nodemailer
       const transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
@@ -64,9 +62,9 @@ export class AuthController {
         html,
       });
 
-      res.status(201).send({ message: "Register Successfully √" });
+      res.status(201).send({ message: "Registration Successful √" });
     } catch (err) {
-      console.log(err);
+      console.error(err);
       res.status(400).send(err);
     }
   }
@@ -79,7 +77,7 @@ export class AuthController {
         where: {
           OR: [
             { email: data },
-            { first_name: data }
+            { password: data }
           ]
         }
       });
@@ -102,18 +100,18 @@ export class AuthController {
           secure: process.env.NODE_ENV === "production",
         })
         .send({
-          message: "Login Successfully √",
+          message: "Login Successful √",
           token,
-          user: {
+          data: {
             id: user.id,
             email: user.email,
-            first_name: user.first_name,
-            last_name: user.last_name,
+            firstName: user.firstName,
+            lastName: user.lastName,
             avatar: user.avatar
           }
         });
     } catch (err) {
-      console.log(err);
+      console.error(err);
       res.status(400).send(err);
     }
   }
@@ -128,10 +126,11 @@ export class AuthController {
         where: { id: verifiedUser.id },
       });
       
-      res.status(200).send({ message: "Verify Successfully √" });
+      res.status(200).send({ message: "Verification Successful √" });
     } catch (err) {
-      console.log(err);
+      console.error(err);
       res.status(400).send(err);
     }
   }
 }
+

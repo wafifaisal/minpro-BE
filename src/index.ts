@@ -1,9 +1,12 @@
 import express, { Application, Request, Response } from "express";
 import cors from "cors";
 import { EventRouter } from "./routers/event.router";
+import { UserRouter } from "./routers/user.router";
+import { AuthRouter } from "./routers/auth.router";
 
 const PORT: number = 8000;
 const app: Application = express();
+
 app.use(express.json());
 app.use(cors({
   origin: "http://localhost:3000",
@@ -15,10 +18,17 @@ app.get("/api", (req: Request, res: Response) => {
 });
 
 const eventRouter = new EventRouter();
+const userRouter = new UserRouter();
+const authRouter = new AuthRouter();
 
 app.use("/api/events", eventRouter.getRouter());
+app.use("/api/users", userRouter.getRouter()); 
+app.use("/api/auth", authRouter.getRouter());
 
-console.log(process.env.JWT_KEY);
+// console.log(process.env.JWT_KEY);
+
+
+
 
 app.listen(PORT, () => {
   console.log(`server running on -> http://localhost:${PORT}/api`);

@@ -95,8 +95,8 @@ enum Status {
 
 model User {
   id          String       @id @default(uuid())
-  first_name  String
-  last_name   String
+  firstName   String
+  lastName    String
   email       String       @unique
   password    String
   avatar      String?
@@ -106,6 +106,7 @@ model User {
   User_Coupon UserCoupon[]
   User_Point  UserPoint[]
   Order       Order[]
+  ref_by      String?
 }
 
 model UserCoupon {
