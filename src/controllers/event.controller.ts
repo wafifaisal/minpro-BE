@@ -38,7 +38,7 @@ export class EventController {
           },
           Organizer: {
             select: {
-              name: true,
+              organizer_name: true,
               avatar: true,
             },
           },
@@ -88,7 +88,7 @@ export class EventController {
           },
           Organizer: {
             select: {
-              name: true,
+              organizer_name: true,
               avatar: true,
             },
           },
@@ -138,3 +138,4 @@ export class EventController {
     }
   }
 }
+

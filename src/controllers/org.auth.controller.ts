@@ -6,45 +6,40 @@ import path from "path";
 import fs from "fs";
 import nodemailer from "nodemailer";
 import handlebars from "handlebars";
-import { generateReferralCode } from "../utils/generateReffCode";
 
 export class AuthController {
   async registerUser(req: Request, res: Response) {
     try {
-      const { password, confirmPassword, firstName, lastName, email, ref_by } = req.body;
+      const { password, confirmPassword, organizer_name, email } = req.body;
       if (password !== confirmPassword) throw { message: "Passwords do not match!" };
 
-      // Check if user exists
-      const existingUser = await prisma.user.findFirst({
-        where: { email }
+      // Check if organizer exists
+      const existingOrganizer = await prisma.organizer.findFirst({
+        where: { OR: [{ email }, { organizer_name }] }
       });
-      if (existingUser) throw { message: "Email has already been used" };
+      if (existingOrganizer) throw { message: "Email or organization name has already been used" };
 
       const salt = await genSalt(10);
       const hashPassword = await hash(password, salt);
-      const ref_code = generateReferralCode(firstName)
 
-      const newUser = await prisma.user.create({
+      const newOrganizer = await prisma.organizer.create({
         data: { 
-          firstName,
-          lastName,
+          organizer_name,
           email,
           password: hashPassword,
           avatar: null,
           isVerify: false,
-          ref_code,
-          ref_by: null
         },
       });
 
-      const payload = { id: newUser.id };
+      const payload = { id: newOrganizer.id };
       const token = sign(payload, process.env.JWT_KEY!, { expiresIn: "10m" });
       const link = `http://localhost:3000/verify/${token}`;
 
       const templatePath = path.join(__dirname, "../templates/verify.hbs");
       const templateSource = fs.readFileSync(templatePath, "utf-8");
       const compiledTemplate = handlebars.compile(templateSource);
-      const html = compiledTemplate({ firstName, link });
+      const html = compiledTemplate({ organizer_name, link });
 
       // Send verification email using nodemailer
       const transporter = nodemailer.createTransport({
@@ -58,7 +53,7 @@ export class AuthController {
       await transporter.sendMail({
         from: process.env.EMAIL_USER,
         to: email,
-        subject: "Welcome to Blogger",
+        subject: "Welcome to Event Organizer",
         html,
       });
 
@@ -73,22 +68,22 @@ export class AuthController {
     try {
       const { data, password } = req.body;
       
-      const user = await prisma.user.findFirst({
+      const organizer = await prisma.organizer.findFirst({
         where: {
           OR: [
             { email: data },
-            { password: data }
+            { organizer_name: data }
           ]
         }
       });
 
-      if (!user) throw { message: "Account not found!" };
-      if (!user.isVerify) throw { message: "Account is not verified!" };
+      if (!organizer) throw { message: "Account not found!" };
+      if (!organizer.isVerify) throw { message: "Account is not verified!" };
 
-      const isValidPass = await compare(password, user.password);
+      const isValidPass = await compare(password, organizer.password!);
       if (!isValidPass) throw { message: "Incorrect Password" };
 
-      const payload = { id: user.id };
+      const payload = { id: organizer.id };
       const token = sign(payload, process.env.JWT_KEY!, { expiresIn: "1d" });
 
       res
@@ -103,11 +98,10 @@ export class AuthController {
           message: "Login Successful √",
           token,
           data: {
-            id: user.id,
-            email: user.email,
-            firstName: user.firstName,
-            lastName: user.lastName,
-            avatar: user.avatar
+            id: organizer.id,
+            email: organizer.email,
+            orgName: organizer.organizer_name,
+            avatar: organizer.avatar
           }
         });
     } catch (err) {
@@ -119,11 +113,11 @@ export class AuthController {
   async verifyUser(req: Request, res: Response) {
     try {
       const { token } = req.params;
-      const verifiedUser = verify(token, process.env.JWT_KEY!) as { id: string };
+      const verifiedOrganizer = verify(token, process.env.JWT_KEY!) as { id: string };
       
-      await prisma.user.update({
+      await prisma.organizer.update({
         data: { isVerify: true },
-        where: { id: verifiedUser.id },
+        where: { id: verifiedOrganizer.id },
       });
       
       res.status(200).send({ message: "Verification Successful √" });
