@@ -27,7 +27,13 @@ export class EventController {
           location: true,
           Ticket: {
             select: {
+              id: true,
+              category: true,
+              desc: true,
               price: true,
+              seats: true,
+              start_time: true,
+              end_time: true,
             },
           },
           Organizer: {
@@ -70,7 +76,8 @@ export class EventController {
               desc: true,
               price: true,
               seats: true,
-
+              start_time: true,
+              end_time: true,
               Order_Details: {
                 select: {
                   id: true,
