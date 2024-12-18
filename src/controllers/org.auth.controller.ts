@@ -7,8 +7,8 @@ import fs from "fs";
 import nodemailer from "nodemailer";
 import handlebars from "handlebars";
 
-export class AuthController {
-  async registerUser(req: Request, res: Response) {
+export class OrgAuthController {
+  async registerOrg(req: Request, res: Response) {
     try {
       const { password, confirmPassword, organizer_name, email } = req.body;
       if (password !== confirmPassword) throw { message: "Passwords do not match!" };
@@ -64,7 +64,7 @@ export class AuthController {
     }
   }
 
-  async loginUser(req: Request, res: Response) {
+  async loginOrg(req: Request, res: Response) {
     try {
       const { data, password } = req.body;
       
@@ -110,7 +110,7 @@ export class AuthController {
     }
   }
 
-  async verifyUser(req: Request, res: Response) {
+  async verifyOrg(req: Request, res: Response) {
     try {
       const { token } = req.params;
       const verifiedOrganizer = verify(token, process.env.JWT_KEY!) as { id: string };

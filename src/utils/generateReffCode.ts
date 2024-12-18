@@ -1,7 +1,5 @@
-import { v4 as uuidv4 } from 'uuid';
-
-export function generateReferralCode(firstName: string): string {
+export function generateReferralCode(firstName: string, id: string): string {
   const namePart = firstName.slice(0, 4).toUpperCase().padEnd(4, 'X');
-  const uuidPart = uuidv4().split('-')[0].slice(0, 4).toUpperCase();
+  const uuidPart = id.slice(0, 6).toUpperCase();
   return `${namePart}${uuidPart}`;
 }
