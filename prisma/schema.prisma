@@ -66,13 +66,13 @@ model Ticket {
 }
 
 model Organizer {
-  id       String  @id @default(uuid())
-  name     String? @unique
-  email    String? @unique
-  password String?
-  avatar   String?
-  isVerify Boolean @default(false)
-  Event    Event[]
+  id             String  @id @default(uuid())
+  organizer_name String  @unique
+  email          String? @unique
+  password       String?
+  avatar         String?
+  isVerify       Boolean @default(false)
+  Event          Event[]
 }
 
 model Rating {
