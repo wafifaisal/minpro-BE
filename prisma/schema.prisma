@@ -57,8 +57,10 @@ model Ticket {
   category      String?
   desc          String?
   seats         Int?
-  start_time    DateTime?
-  end_time      DateTime?
+  start_time    DateTime        @db.Time()
+  end_time      DateTime        @db.Time()
+  start_date    DateTime        @db.Date
+  end_date      DateTime        @db.Date
   price         Int
   Order_Details Order_Details[]
   Event         Event?          @relation(fields: [eventId], references: [id])
