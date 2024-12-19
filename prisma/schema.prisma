@@ -30,12 +30,12 @@ enum EventType {
 }
 
 model Event {
-  id              Int           @id @default(autoincrement())
+  id              String        @id @default(uuid())
   event_name      String?       @unique
   description     String?
-  slug            String?       @unique
-  start_time      DateTime?
-  end_time        DateTime?
+  start_time      DateTime?     @db.Time()
+  end_time        DateTime?     @db.Time()
+  event_date      DateTime?     @db.Date
   location        Location
   venue           String?
   event_type      EventType
@@ -57,14 +57,10 @@ model Ticket {
   category      String?
   desc          String?
   seats         Int?
-  start_time    DateTime        @db.Time()
-  end_time      DateTime        @db.Time()
-  start_date    DateTime        @db.Date
-  end_date      DateTime        @db.Date
   price         Int
   Order_Details Order_Details[]
   Event         Event?          @relation(fields: [eventId], references: [id])
-  eventId       Int?
+  eventId       String?
 }
 
 model Organizer {
@@ -82,7 +78,7 @@ model Rating {
   rating  Int
   comment String
   Event   Event?  @relation(fields: [eventId], references: [id])
-  eventId Int?
+  eventId String?
   User    User?   @relation(fields: [userId], references: [id])
   userId  String?
 }
@@ -144,7 +140,7 @@ model Order {
   User          User?           @relation(fields: [userId], references: [id])
   userId        String?
   Event         Event?          @relation(fields: [eventId], references: [id])
-  eventId       Int?
+  eventId       String?
 }
 
 model Order_Details {

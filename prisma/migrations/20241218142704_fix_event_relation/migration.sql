@@ -12,12 +12,12 @@ CREATE TYPE "Status" AS ENUM ('Pending', 'Paid', 'Cancelled');
 
 -- CreateTable
 CREATE TABLE "Event" (
-    "id" SERIAL NOT NULL,
+    "id" TEXT NOT NULL,
     "event_name" TEXT,
     "description" TEXT,
-    "slug" TEXT,
     "start_time" TIMESTAMP(3),
     "end_time" TIMESTAMP(3),
+    "event_date" TIMESTAMP(3),
     "location" "Location" NOT NULL,
     "venue" TEXT,
     "event_type" "EventType" NOT NULL,
@@ -38,12 +38,8 @@ CREATE TABLE "Ticket" (
     "category" TEXT,
     "desc" TEXT,
     "seats" INTEGER,
-    "start_time" TIME NOT NULL,
-    "end_time" TIME NOT NULL,
-    "start_date" DATE NOT NULL,
-    "end_date" DATE NOT NULL,
     "price" INTEGER NOT NULL,
-    "eventId" INTEGER,
+    "eventId" TEXT,
 
     CONSTRAINT "Ticket_pkey" PRIMARY KEY ("id")
 );
@@ -65,7 +61,7 @@ CREATE TABLE "Rating" (
     "id" SERIAL NOT NULL,
     "rating" INTEGER NOT NULL,
     "comment" TEXT NOT NULL,
-    "eventId" INTEGER,
+    "eventId" TEXT,
     "userId" TEXT,
 
     CONSTRAINT "Rating_pkey" PRIMARY KEY ("id")
@@ -121,7 +117,7 @@ CREATE TABLE "Order" (
     "expiredAt" TIMESTAMP(3) NOT NULL,
     "redirect_url" TEXT,
     "userId" TEXT,
-    "eventId" INTEGER,
+    "eventId" TEXT,
 
     CONSTRAINT "Order_pkey" PRIMARY KEY ("id")
 );
@@ -138,9 +134,6 @@ CREATE TABLE "Order_Details" (
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Event_event_name_key" ON "Event"("event_name");
-
--- CreateIndex
-CREATE UNIQUE INDEX "Event_slug_key" ON "Event"("slug");
 
 -- CreateIndex
 CREATE UNIQUE INDEX "Organizer_organizer_name_key" ON "Organizer"("organizer_name");

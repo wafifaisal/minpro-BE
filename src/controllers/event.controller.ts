@@ -1,4 +1,5 @@
 import { Request, Response } from "express";
+
 import { PrismaClient, Prisma } from "@prisma/client";
 import { cloudinaryUpload } from "../services/cloudinary";
 
@@ -20,9 +21,9 @@ export class EventController {
           event_name: true,
           event_thumbnail: true,
           event_preview: true,
-          slug: true,
           start_time: true,
           end_time: true,
+          event_date: true,
           venue: true,
           location: true,
           Ticket: {
@@ -32,8 +33,6 @@ export class EventController {
               desc: true,
               price: true,
               seats: true,
-              start_time: true,
-              end_time: true,
             },
           },
           Organizer: {
@@ -44,7 +43,7 @@ export class EventController {
           },
         },
       });
-      console.log("Fetched events:", events);
+      // console.log("Fetched events:", events);
       res.status(200).send({ events });
     } catch (err) {
       console.error("Error fetching events:", err);
@@ -52,11 +51,11 @@ export class EventController {
     }
   }
 
-  async getEventSlug(req: Request, res: Response) {
-    const { slug } = req.params;
+  async getEventbyID(req: Request, res: Response) {
     try {
+      console.log(req.params.id);
       const event = await prisma.event.findUnique({
-        where: { slug: slug },
+        where: { id: req.params.id },
         select: {
           id: true,
           event_name: true,
@@ -65,9 +64,9 @@ export class EventController {
           location: true,
           start_time: true,
           end_time: true,
+          event_date: true,
           event_thumbnail: true,
           event_preview: true,
-          slug: true,
           venue: true,
           Ticket: {
             select: {
@@ -76,8 +75,6 @@ export class EventController {
               desc: true,
               price: true,
               seats: true,
-              start_time: true,
-              end_time: true,
               Order_Details: {
                 select: {
                   id: true,
@@ -94,10 +91,10 @@ export class EventController {
           },
         },
       });
-      res.status(200).send({ event });
+      res.status(200).send({ result: event });
     } catch (err) {
-      console.error("Error fetching event by slug:", err);
-      res.status(400).send({ error: "Failed to fetch event" });
+      console.log(err);
+      res.status(400).send(err);
     }
   }
 
@@ -105,22 +102,24 @@ export class EventController {
     try {
       if (!req.file) throw { message: "thumbnail empty" };
       const { secure_url } = await cloudinaryUpload(req.file, "event");
+
       const {
         event_name,
         description,
-        location = "Bandung",
+        location,
         venue,
         start_time,
         end_time,
-        event_type = "Free",
-        category = "Other",
+        event_date,
+        event_type,
+        category,
+        event_preview,
       } = req.body;
 
-      await prisma.event.create({
+      const { id } = await prisma.event.create({
         data: {
           event_name,
           event_thumbnail: secure_url,
-          event_preview: secure_url,
           description,
           venue,
           location,
@@ -128,10 +127,12 @@ export class EventController {
           end_time,
           event_type,
           category,
+          event_date,
+          event_preview,
         },
       });
 
-      res.status(200).send({ message: "event created" });
+      res.status(200).send({ message: "event created", event_id: id });
     } catch (err) {
       console.log(err);
       res.status(400).send(err);
