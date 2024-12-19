@@ -15,7 +15,7 @@ export const upload = multer({ storage: multer.memoryStorage() });
 app.use(express.json());
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: process.env.BASE_URL_FE,
     credentials: true,
   })
 );
