@@ -6,6 +6,7 @@ import { AuthRouter } from "./routers/auth.router";
 import multer from "multer";
 
 import { OrgAuthRouter } from "./routers/org.auth.router";
+import { TicketRouter } from "./routers/ticket.router";
 
 const PORT: number = 8000;
 const app: Application = express();
@@ -24,11 +25,13 @@ app.get("/api", (req: Request, res: Response) => {
 });
 
 const eventRouter = new EventRouter();
+const ticketRouter = new TicketRouter();
 const userRouter = new UserRouter();
 const authRouter = new AuthRouter();
 const orgAuthRouter = new OrgAuthRouter();
 
 app.use("/api/events", eventRouter.getRouter());
+app.use("/api/tickets", ticketRouter.getRouter());
 app.use("/api/users", userRouter.getRouter());
 app.use("/api/auth", authRouter.getRouter());
 app.use("/api/organizer", orgAuthRouter.getRouter());

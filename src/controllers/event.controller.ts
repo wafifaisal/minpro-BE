@@ -53,7 +53,6 @@ export class EventController {
 
   async getEventbyID(req: Request, res: Response) {
     try {
-      console.log(req.params.id);
       const event = await prisma.event.findUnique({
         where: { id: req.params.id },
         select: {
