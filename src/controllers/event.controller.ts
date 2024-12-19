@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 
-import { PrismaClient, Prisma } from "@prisma/client";
+import { PrismaClient, Prisma } from "../../prisma/generated/client";
 import { cloudinaryUpload } from "../services/cloudinary";
 
 const prisma = new PrismaClient();

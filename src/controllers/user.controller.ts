@@ -1,6 +1,6 @@
 import { Request, Response } from "express";
 import prisma from "../prisma";
-import { Prisma } from "@prisma/client";
+import { Prisma } from "../../prisma/generated/client";
 
 export class UserController {
   async getUsers(req: Request, res: Response) {
@@ -49,7 +49,10 @@ export class UserController {
   async editUser(req: Request, res: Response) {
     try {
       const { id } = req.params;
-      await prisma.user.update({ data: req.body, where: { id: id.toString() } });
+      await prisma.user.update({
+        data: req.body,
+        where: { id: id.toString() },
+      });
       res.status(200).send("User updated ✅");
     } catch (err) {
       console.log(err);
