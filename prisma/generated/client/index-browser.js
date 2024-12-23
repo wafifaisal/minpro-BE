@@ -17,12 +17,12 @@ exports.Prisma = Prisma
 exports.$Enums = {}
 
 /**
- * Prisma Client JS version: 6.0.1
- * Query Engine version: 5dbef10bdbfb579e07d35cc85fb1518d357cb99e
+ * Prisma Client JS version: 6.1.0
+ * Query Engine version: 11f085a2012c0f4778414c8db2651556ee0ef959
  */
 Prisma.prismaVersion = {
-  client: "6.0.1",
-  engine: "5dbef10bdbfb579e07d35cc85fb1518d357cb99e"
+  client: "6.1.0",
+  engine: "11f085a2012c0f4778414c8db2651556ee0ef959"
 }
 
 Prisma.PrismaClientKnownRequestError = () => {
@@ -197,7 +197,6 @@ exports.Prisma.OrderScalarFieldEnum = {
   total_price: 'total_price',
   final_price: 'final_price',
   status: 'status',
-  payment_proof: 'payment_proof',
   createdAt: 'createdAt',
   expiredAt: 'expiredAt',
   redirect_url: 'redirect_url',
@@ -206,8 +205,8 @@ exports.Prisma.OrderScalarFieldEnum = {
 };
 
 exports.Prisma.Order_DetailsScalarFieldEnum = {
-  id: 'id',
   quantity: 'quantity',
+  subtotal: 'subtotal',
   orderId: 'orderId',
   ticketId: 'ticketId'
 };
