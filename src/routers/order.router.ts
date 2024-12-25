@@ -1,24 +1,23 @@
-// import { Router } from "express";
-// import { OrderController } from "../controllers/order.controller";
-// // import { verifyToken } from "../middlewares/verify";
+import { Router } from "express";
+import { OrderController } from "../controllers/order.controller";
 
-// export class OrderRouter {
-//   private orderController: OrderController;
-//   private router: Router;
+export class OrderRouter {
+  private router: Router;
+  private orderController: OrderController;
 
-//   constructor() {
-//     this.orderController = new OrderController();
-//     this.router = Router();
-//     this.intializeRoutes();
-//   }
+  constructor() {
+    this.router = Router();
+    this.orderController = new OrderController();
+    this.initializeRoutes();
+  }
 
-//   private intializeRoutes() {
-//     // this.router.post("/", verifyToken, this.orderController.createOrder);
-//     this.router.post("/", this.orderController.createOrder);
-//     this.router.post("/status", this.orderController.updateStatus);
-//   }
+  private initializeRoutes() {
+    this.router.get("/:id", this.orderController.getOrderId);
+    this.router.post("/", this.orderController.createTransaction);
+    this.router.post("/payment", this.orderController.getSnapToken);
+  }
 
-//   getRouter(): Router {
-//     return this.router;
-//   }
-// }
+  getRouter(): Router {
+    return this.router;
+  }
+}
