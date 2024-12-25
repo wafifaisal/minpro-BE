@@ -11,12 +11,14 @@ import { generateReferralCode } from "../utils/generateReffCode";
 export class AuthController {
   async registerUser(req: Request, res: Response) {
     try {
-      const { password, confirmPassword, firstName, lastName, email, ref_by } = req.body;
-      if (password !== confirmPassword) throw { message: "Passwords do not match!" };
+      const { password, confirmPassword, firstName, lastName, email, ref_by } =
+        req.body;
+      if (password !== confirmPassword)
+        throw { message: "Passwords do not match!" };
 
       // Check if user exists
       const existingUser = await prisma.user.findFirst({
-        where: { email }
+        where: { email },
       });
       if (existingUser) throw { message: "Email has already been used" };
 
@@ -25,19 +27,20 @@ export class AuthController {
 
 
       const newUser = await prisma.user.create({
-        data: { 
+        data: {
           firstName,
           lastName,
           email,
           password: hashPassword,
           avatar: null,
           isVerify: false,
-          ref_code:"",
-          ref_by: null
+          ref_code: "",
+          ref_by: null,
         },
       });
       console.log("New User Created:", newUser);
 
+<<<<<<< HEAD
 const refCode = generateReferralCode(newUser.firstName, newUser.id);
 await prisma.user.update({
   where: { id: newUser.id },
@@ -83,9 +86,69 @@ if (ref_by) {
     console.log(`10% discount coupon added for new user: ${newUser.id}, expires on ${couponExpiryDate}`);
   }
   
+=======
+      const refCode = generateReferralCode(newUser.firstName, newUser.id);
+      await prisma.user.update({
+        where: { id: newUser.id },
+        data: { ref_code: refCode },
+      });
+      console.log("Referral Code Updated:", refCode);
+
+      // If referred by another user, handle points and coupon generation
+      if (ref_by) {
+        console.log("Processing referral...");
+
+        // Find the referrer by referral code
+        const referrer = await prisma.user.findFirst({
+          where: { ref_code: ref_by },
+        });
+        if (!referrer) throw { message: "Invalid referral code" };
+
+        // Update the new user's `ref_by` field with the referral code
+        await prisma.user.update({
+          where: { id: newUser.id },
+          data: { ref_by: ref_by }, // Store the referral code, not the user ID
+        });
+
+        console.log(
+          `Referral code ${ref_by} linked to new user: ${newUser.id}`
+        );
+
+        // Add points to the referrer
+        const pointExpiryDate = new Date();
+        pointExpiryDate.setMonth(pointExpiryDate.getMonth() + 3);
+        await prisma.userPoint.create({
+          data: {
+            userId: referrer.id,
+            point: 10000,
+            expiredAt: pointExpiryDate,
+          },
+        });
+
+        console.log(
+          `10,000 points added to referrer: ${referrer.id}, expires on ${pointExpiryDate}`
+        );
+
+        // Create a discount coupon for the new user
+        const couponExpiryDate = new Date();
+        couponExpiryDate.setMonth(couponExpiryDate.getMonth() + 3);
+        await prisma.userCoupon.create({
+          data: {
+            userId: newUser.id,
+            percentage: 10,
+            expiredAt: couponExpiryDate,
+          },
+        });
+
+        console.log(
+          `10% discount coupon added for new user: ${newUser.id}, expires on ${couponExpiryDate}`
+        );
+      }
+
+>>>>>>> 4c5c85055533d9ffa5802cf1253d2204c368e7ea
       const payload = { id: newUser.id };
       const token = sign(payload, process.env.JWT_KEY!, { expiresIn: "10m" });
-      const link = `http://localhost:3000/verify/${token}`;
+      const link = `${process.env.BASE_URL_FE}/verify/${token}`;
 
       const templatePath = path.join(__dirname, "../templates/verify.hbs");
       const templateSource = fs.readFileSync(templatePath, "utf-8");
@@ -96,8 +159,8 @@ if (ref_by) {
         service: "gmail",
         auth: {
           user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS
-        }
+          pass: process.env.EMAIL_PASS,
+        },
       });
 
       await transporter.sendMail({
@@ -117,14 +180,11 @@ if (ref_by) {
   async loginUser(req: Request, res: Response) {
     try {
       const { data, password } = req.body;
-      
+
       const user = await prisma.user.findFirst({
         where: {
-          OR: [
-            { email: data },
-            { password: data }
-          ]
-        }
+          OR: [{ email: data }, { password: data }],
+        },
       });
 
       if (!user) throw { message: "Account not found!" };
@@ -152,8 +212,8 @@ if (ref_by) {
             email: user.email,
             firstName: user.firstName,
             lastName: user.lastName,
-            avatar: user.avatar
-          }
+            avatar: user.avatar,
+          },
         });
     } catch (err) {
       console.error(err);
@@ -164,13 +224,15 @@ if (ref_by) {
   async verifyUser(req: Request, res: Response) {
     try {
       const { token } = req.params;
-      const verifiedUser = verify(token, process.env.JWT_KEY!) as { id: string };
-      
+      const verifiedUser = verify(token, process.env.JWT_KEY!) as {
+        id: string;
+      };
+
       await prisma.user.update({
         data: { isVerify: true },
         where: { id: verifiedUser.id },
       });
-      
+
       res.status(200).send({ message: "Verification Successful √" });
     } catch (err) {
       console.error(err);
@@ -178,4 +240,3 @@ if (ref_by) {
     }
   }
 }
-

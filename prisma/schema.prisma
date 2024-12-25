@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "./generated/client"
 }
 
 datasource db {
@@ -132,7 +133,6 @@ model Order {
   total_price   Int
   final_price   Int
   status        Status          @default(Pending)
-  payment_proof String
   createdAt     DateTime        @default(now())
   expiredAt     DateTime
   redirect_url  String?
@@ -144,10 +144,12 @@ model Order {
 }
 
 model Order_Details {
-  id       Int     @id @default(autoincrement())
   quantity Int
-  Order    Order?  @relation(fields: [orderId], references: [id])
-  orderId  Int?
-  Ticket   Ticket? @relation(fields: [ticketId], references: [id])
-  ticketId Int?
+  subtotal Int
+  Order    Order  @relation(fields: [orderId], references: [id]) // Relation to Order
+  orderId  Int
+  Ticket   Ticket @relation(fields: [ticketId], references: [id]) // Relation to Ticket
+  ticketId Int
+
+  @@id([orderId, ticketId]) // Composite primary key
 }
