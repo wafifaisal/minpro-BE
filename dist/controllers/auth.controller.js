@@ -28,7 +28,6 @@ class AuthController {
                 const { password, confirmPassword, firstName, lastName, email, ref_by } = req.body;
                 if (password !== confirmPassword)
                     throw { message: "Passwords do not match!" };
-                // Check if user exists
                 const existingUser = yield prisma_1.default.user.findFirst({
                     where: { email },
                 });
@@ -36,7 +35,6 @@ class AuthController {
                     throw { message: "Email has already been used" };
                 const salt = yield (0, bcrypt_1.genSalt)(10);
                 const hashPassword = yield (0, bcrypt_1.hash)(password, salt);
-                const ref_code = "";
                 const newUser = yield prisma_1.default.user.create({
                     data: {
                         firstName,
@@ -56,22 +54,16 @@ class AuthController {
                     data: { ref_code: refCode },
                 });
                 console.log("Referral Code Updated:", refCode);
-                // If referred by another user, handle points and coupon generation
                 if (ref_by) {
                     console.log("Processing referral...");
-                    // Find the referrer by referral code
-                    const referrer = yield prisma_1.default.user.findFirst({
-                        where: { ref_code: ref_by },
-                    });
+                    const referrer = yield prisma_1.default.user.findFirst({ where: { ref_code: ref_by } });
                     if (!referrer)
                         throw { message: "Invalid referral code" };
-                    // Update the new user's `ref_by` field with the referral code
                     yield prisma_1.default.user.update({
                         where: { id: newUser.id },
-                        data: { ref_by: ref_by }, // Store the referral code, not the user ID
+                        data: { ref_by: ref_by },
                     });
                     console.log(`Referral code ${ref_by} linked to new user: ${newUser.id}`);
-                    // Add points to the referrer
                     const pointExpiryDate = new Date();
                     pointExpiryDate.setMonth(pointExpiryDate.getMonth() + 3);
                     yield prisma_1.default.userPoint.create({
@@ -82,7 +74,6 @@ class AuthController {
                         },
                     });
                     console.log(`10,000 points added to referrer: ${referrer.id}, expires on ${pointExpiryDate}`);
-                    // Create a discount coupon for the new user
                     const couponExpiryDate = new Date();
                     couponExpiryDate.setMonth(couponExpiryDate.getMonth() + 3);
                     yield prisma_1.default.userCoupon.create({
@@ -101,7 +92,6 @@ class AuthController {
                 const templateSource = fs_1.default.readFileSync(templatePath, "utf-8");
                 const compiledTemplate = handlebars_1.default.compile(templateSource);
                 const html = compiledTemplate({ firstName, link });
-                // Send verification email using nodemailer
                 const transporter = nodemailer_1.default.createTransport({
                     service: "gmail",
                     auth: {
@@ -145,7 +135,7 @@ class AuthController {
                     .status(200)
                     .cookie("token", token, {
                     httpOnly: true,
-                    maxAge: 24 * 3600 * 1000, // 24 hours
+                    maxAge: 24 * 3600 * 1000,
                     path: "/",
                     secure: process.env.NODE_ENV === "production",
                 })
