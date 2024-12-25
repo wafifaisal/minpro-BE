@@ -87,8 +87,8 @@ class EventController {
                                 seats: true,
                                 Order_Details: {
                                     select: {
-                                        id: true,
                                         quantity: true,
+                                        subtotal: true,
                                     },
                                 },
                             },
