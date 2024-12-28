@@ -246,9 +246,9 @@ exports.EventCategory = exports.$Enums.EventCategory = {
 };
 
 exports.Status = exports.$Enums.Status = {
-  Pending: 'Pending',
-  Paid: 'Paid',
-  Cancelled: 'Cancelled'
+  pending: 'pending',
+  success: 'success',
+  cancelled: 'cancelled'
 };
 
 exports.Prisma.ModelName = {

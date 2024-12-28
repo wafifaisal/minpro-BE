@@ -1,6 +1,6 @@
 export interface ITicketCartItem {
-  qty: number;
-  ticket: {
+  quantity: number;
+  Ticket: {
     id: number;
     price: number;
     seats: number;
