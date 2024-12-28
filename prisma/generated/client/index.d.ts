@@ -93,9 +93,9 @@ export type EventType = (typeof EventType)[keyof typeof EventType]
 
 
 export const Status: {
-  Pending: 'Pending',
-  Paid: 'Paid',
-  Cancelled: 'Cancelled'
+  pending: 'pending',
+  success: 'success',
+  cancelled: 'cancelled'
 };
 
 export type Status = (typeof Status)[keyof typeof Status]
