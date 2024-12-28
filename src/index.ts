@@ -5,7 +5,7 @@ import { UserRouter } from "./routers/user.router";
 import { AuthRouter } from "./routers/auth.router";
 import multer from "multer";
 
-import { OrgAuthRouter } from "./routers/org.auth.router";
+import { OrgAuthRouter } from "./routers/org.router";
 import { TicketRouter } from "./routers/ticket.router";
 import { OrderRouter } from "./routers/order.router";
 
