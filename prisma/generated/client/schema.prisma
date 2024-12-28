@@ -69,7 +69,7 @@ model Organizer {
   organizer_name String  @unique
   email          String? @unique
   password       String?
-  avatar         String?
+  avatar         String? @default("https://res.cloudinary.com/dkyco4yqp/image/upload/v1735131879/HYPETIX-removebg-preview_qxyuj5.png")
   isVerify       Boolean @default(false)
   Event          Event[]
 }
@@ -87,9 +87,9 @@ model Rating {
 //------------USER-----------------------
 
 enum Status {
-  Pending
-  Paid
-  Cancelled
+  pending
+  success
+  cancelled
 }
 
 model User {
@@ -132,7 +132,7 @@ model Order {
   id            Int             @id @default(autoincrement())
   total_price   Int
   final_price   Int
-  status        Status          @default(Pending)
+  status        Status          @default(pending)
   createdAt     DateTime        @default(now())
   expiredAt     DateTime
   redirect_url  String?
