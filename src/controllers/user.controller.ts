@@ -3,6 +3,7 @@ import prisma from "../prisma";
 import { Prisma } from "../../prisma/generated/client";
 
 export class UserController {
+  // Method untuk mengambil semua pengguna
   async getUsers(req: Request, res: Response) {
     try {
       const { search, page = 1, limit = 5 } = req.query;
@@ -12,6 +13,7 @@ export class UserController {
           { email: { contains: search as string, mode: "insensitive" } },
         ];
       }
+
       const countUser = await prisma.user.aggregate({ _count: { _all: true } });
       const total_page = Math.ceil(countUser._count._all / +limit);
       const users = await prisma.user.findMany({
@@ -20,12 +22,15 @@ export class UserController {
         take: +limit,
         skip: +limit * (+page - 1),
       });
+
       res.status(200).send({ total_page, page, users });
     } catch (err) {
       console.log(err);
       res.status(400).send(err);
     }
   }
+
+  // Method untuk mengambil data pengguna berdasarkan ID
   async getUserId(req: Request, res: Response) {
     try {
       const user = await prisma.user.findUnique({
@@ -37,15 +42,8 @@ export class UserController {
       res.status(400).send(err);
     }
   }
-  async createUser(req: Request, res: Response) {
-    try {
-      await prisma.user.create({ data: req.body });
-      res.status(201).send("User created ✅");
-    } catch (err) {
-      console.log(err);
-      res.status(400).send(err);
-    }
-  }
+
+  // Method untuk mengedit data pengguna
   async editUser(req: Request, res: Response) {
     try {
       const { id } = req.params;
@@ -59,6 +57,8 @@ export class UserController {
       res.status(400).send(err);
     }
   }
+
+  // Method untuk menghapus pengguna
   async deleteUser(req: Request, res: Response) {
     try {
       const { id } = req.params;
@@ -69,6 +69,8 @@ export class UserController {
       res.status(400).send(err);
     }
   }
+
+  // Method untuk mengedit avatar pengguna
   async editAvatar(req: Request, res: Response) {
     try {
       if (!req.file) throw { message: "file empty" };
@@ -83,10 +85,11 @@ export class UserController {
       res.status(400).send(err);
     }
   }
+
+  // Method untuk mengedit avatar menggunakan Cloud (non-functional)
   async editAvatarCloud(req: Request, res: Response) {
     try {
       if (!req.file) throw { message: "file empty" };
-      // Removed cloudinary upload since it's not available
       res.status(400).send({ message: "Upload failed" });
     } catch (err) {
       console.log(err);
