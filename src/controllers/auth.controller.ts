@@ -9,20 +9,21 @@ import handlebars from "handlebars";
 import { generateReferralCode } from "../utils/generateReffCode";
 
 export class AuthController {
+  // Method untuk registrasi pengguna
   async registerUser(req: Request, res: Response) {
     try {
       const { password, confirmPassword, firstName, lastName, email, ref_by } =
         req.body;
+
       if (password !== confirmPassword)
         throw { message: "Passwords do not match!" };
 
-      const existingUser = await prisma.user.findFirst({
-        where: { email },
-      });
+      const existingUser = await prisma.user.findFirst({ where: { email } });
       if (existingUser) throw { message: "Email has already been used" };
 
       const salt = await genSalt(10);
       const hashPassword = await hash(password, salt);
+
       const newUser = await prisma.user.create({
         data: {
           firstName,
@@ -58,7 +59,7 @@ export class AuthController {
         });
 
         console.log(
-          `Referral code ${ref_by} linked to new user: ${newUser.id}`
+          `Referral code ${ref_by} linked to new user: ${newUser.id}`,
         );
 
         const pointExpiryDate = new Date();
@@ -72,7 +73,7 @@ export class AuthController {
         });
 
         console.log(
-          `10,000 points added to referrer: ${referrer.id}, expires on ${pointExpiryDate}`
+          `10,000 points added to referrer: ${referrer.id}, expires on ${pointExpiryDate}`,
         );
 
         const couponExpiryDate = new Date();
@@ -86,7 +87,7 @@ export class AuthController {
         });
 
         console.log(
-          `10% discount coupon added for new user: ${newUser.id}, expires on ${couponExpiryDate}`
+          `10% discount coupon added for new user: ${newUser.id}, expires on ${couponExpiryDate}`,
         );
       }
 
@@ -94,11 +95,11 @@ export class AuthController {
       const token = sign(payload, process.env.JWT_KEY!, { expiresIn: "10m" });
       const link = `${process.env.BASE_URL_FE}/verify/${token}`;
 
-      const templatePath = path.join(__dirname, "../templates/verify.hbs");
+      const templatePath = path.join(__dirname, "../templates/verifyUser.hbs");
       const templateSource = fs.readFileSync(templatePath, "utf-8");
       const compiledTemplate = handlebars.compile(templateSource);
       const html = compiledTemplate({ firstName, link });
-
+      const nodemailer = require('nodemailer');
       const transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
@@ -121,10 +122,10 @@ export class AuthController {
     }
   }
 
+  // Method untuk login
   async loginUser(req: Request, res: Response) {
     try {
       const { data, password } = req.body;
-      console.log(req.body);
       const user = await prisma.user.findFirst({
         where: {
           OR: [{ email: data }, { password: data }],
@@ -165,6 +166,7 @@ export class AuthController {
     }
   }
 
+  // Method untuk verifikasi pengguna
   async verifyUser(req: Request, res: Response) {
     try {
       const { token } = req.params;

@@ -11,19 +11,21 @@ export class OrgAuthController {
   async registerOrg(req: Request, res: Response) {
     try {
       const { password, confirmPassword, organizer_name, email } = req.body;
-      if (password !== confirmPassword) throw { message: "Passwords do not match!" };
+      if (password !== confirmPassword)
+        throw { message: "Passwords do not match!" };
 
       // Check if organizer exists
       const existingOrganizer = await prisma.organizer.findFirst({
-        where: { OR: [{ email }, { organizer_name }] }
+        where: { OR: [{ email }, { organizer_name }] },
       });
-      if (existingOrganizer) throw { message: "Email or organization name has already been used" };
+      if (existingOrganizer)
+        throw { message: "Email or organization name has already been used" };
 
       const salt = await genSalt(10);
       const hashPassword = await hash(password, salt);
 
       const newOrganizer = await prisma.organizer.create({
-        data: { 
+        data: {
           organizer_name,
           email,
           password: hashPassword,
@@ -36,7 +38,7 @@ export class OrgAuthController {
       const token = sign(payload, process.env.JWT_KEY!, { expiresIn: "10m" });
       const link = `http://localhost:3000/verify/${token}`;
 
-      const templatePath = path.join(__dirname, "../templates/verify.hbs");
+      const templatePath = path.join(__dirname, "../templates/verifyUser.hbs");
       const templateSource = fs.readFileSync(templatePath, "utf-8");
       const compiledTemplate = handlebars.compile(templateSource);
       const html = compiledTemplate({ organizer_name, link });
@@ -46,8 +48,8 @@ export class OrgAuthController {
         service: "gmail",
         auth: {
           user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASS
-        }
+          pass: process.env.EMAIL_PASS,
+        },
       });
 
       await transporter.sendMail({
@@ -67,14 +69,11 @@ export class OrgAuthController {
   async loginOrg(req: Request, res: Response) {
     try {
       const { data, password } = req.body;
-      
+
       const organizer = await prisma.organizer.findFirst({
         where: {
-          OR: [
-            { email: data },
-            { organizer_name: data }
-          ]
-        }
+          OR: [{ email: data }, { organizer_name: data }],
+        },
       });
 
       if (!organizer) throw { message: "Account not found!" };
@@ -101,9 +100,9 @@ export class OrgAuthController {
             id: organizer.id,
             email: organizer.email,
             orgName: organizer.organizer_name,
-            avatar: organizer.avatar
+            avatar: organizer.avatar,
           },
-          redirectUrl: "/organizer/dashboard"
+          redirectUrl: "/organizer/dashboard",
         });
     } catch (err) {
       console.error(err);
@@ -114,13 +113,15 @@ export class OrgAuthController {
   async verifyOrg(req: Request, res: Response) {
     try {
       const { token } = req.params;
-      const verifiedOrganizer = verify(token, process.env.JWT_KEY!) as { id: string };
-      
+      const verifiedOrganizer = verify(token, process.env.JWT_KEY!) as {
+        id: string;
+      };
+
       await prisma.organizer.update({
         data: { isVerify: true },
         where: { id: verifiedOrganizer.id },
       });
-      
+
       res.status(200).send({ message: "Verification Successful √" });
     } catch (err) {
       console.error(err);
@@ -128,4 +129,3 @@ export class OrgAuthController {
     }
   }
 }
-
