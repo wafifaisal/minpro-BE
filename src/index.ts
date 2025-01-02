@@ -8,6 +8,7 @@ import multer from "multer";
 import { OrgAuthRouter } from "./routers/org.auth.router";
 import { TicketRouter } from "./routers/ticket.router";
 import { OrderRouter } from "./routers/order.router";
+import { ReviewRouter } from "./routers/review.router";
 
 const PORT: number = 8000;
 const app: Application = express();
@@ -31,6 +32,7 @@ const userRouter = new UserRouter();
 const authRouter = new AuthRouter();
 const orgAuthRouter = new OrgAuthRouter();
 const orderRouter = new OrderRouter();
+const reviewRouter = new ReviewRouter();
 
 app.use("/api/events", eventRouter.getRouter());
 app.use("/api/tickets", ticketRouter.getRouter());
@@ -38,6 +40,7 @@ app.use("/api/users", userRouter.getRouter());
 app.use("/api/auth", authRouter.getRouter());
 app.use("/api/organizer", orgAuthRouter.getRouter());
 app.use("/api/order", orderRouter.getRouter());
+app.use("/api/reviews", reviewRouter.getRouter());
 
 console.log(process.env.JWT_KEY);
 

@@ -16,7 +16,6 @@ export class TicketController {
 
   async createTicket(req: Request, res: Response) {
     try {
-      console.log(req.params.eventId);
       const eventId = req.params.eventId;
 
       req.body.eventId = req.params.eventId;

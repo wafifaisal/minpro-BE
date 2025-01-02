@@ -45,12 +45,14 @@ model Event {
   event_preview   String?
   createdAt       DateTime?     @default(now())
   updatedAt       DateTime?     @updatedAt
+  coupon_seat     Int?
   category        EventCategory
   Ticket          Ticket[]
   Rating          Rating[]
   Order           Order[]
   Organizer       Organizer?    @relation(fields: [organizerId], references: [id])
   organizerId     String?
+  Review          Review[]
 }
 
 model Ticket {
@@ -92,6 +94,14 @@ enum Status {
   cancelled
 }
 
+enum RatingRange {
+  ONE   @map("1")
+  TWO   @map("2")
+  THREE @map("3")
+  FOUR  @map("4")
+  FIVE  @map("5")
+}
+
 model User {
   id          String       @id @default(uuid())
   firstName   String
@@ -106,6 +116,7 @@ model User {
   User_Point  UserPoint[]
   Order       Order[]
   ref_by      String?
+  Review      Review[]
 }
 
 model UserCoupon {
@@ -152,4 +163,16 @@ model Order_Details {
   ticketId Int
 
   @@id([orderId, ticketId]) // Composite primary key
+}
+
+model Review {
+  userId    String
+  eventId   String
+  comment   String
+  rating    RatingRange
+  createdAt DateTime    @default(now())
+  user      User        @relation(fields: [userId], references: [id])
+  events    Event       @relation(fields: [eventId], references: [id])
+
+  @@id([userId, eventId])
 }
