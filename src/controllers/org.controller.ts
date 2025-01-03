@@ -127,4 +127,23 @@ export class OrganizerController {
       res.status(400).send(err);
     }
   }
+
+  // Metode untuk mengambil data organizer berdasarkan id
+  async getOrganizer(req: Request, res: Response) {
+    try {
+      const { id } = req.params;
+      const organizer = await prisma.organizer.findUnique({
+        where: { id },
+      });
+
+      if (!organizer) {
+        return res.status(404).send({ message: "Organizer not found" });
+      }
+
+      res.status(200).json(organizer);
+    } catch (err) {
+      console.error(err);
+      res.status(500).send({ message: "Internal Server Error" });
+    }
+  }
 }
