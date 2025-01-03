@@ -7,19 +7,19 @@ import fs from "fs";
 import nodemailer from "nodemailer";
 import handlebars from "handlebars";
 
-export class OrgAuthController {
+export class OrganizerController {
+  // Metode untuk registrasi organizer
   async registerOrg(req: Request, res: Response) {
     try {
       const { password, confirmPassword, organizer_name, email } = req.body;
+
       if (password !== confirmPassword)
         throw { message: "Passwords do not match!" };
 
-      // Check if organizer exists
       const existingOrganizer = await prisma.organizer.findFirst({
-        where: { OR: [{ email }, { organizer_name }] },
+        where: { email },
       });
-      if (existingOrganizer)
-        throw { message: "Email or organization name has already been used" };
+      if (existingOrganizer) throw { message: "Email has already been used" };
 
       const salt = await genSalt(10);
       const hashPassword = await hash(password, salt);
@@ -29,21 +29,22 @@ export class OrgAuthController {
           organizer_name,
           email,
           password: hashPassword,
-          avatar: null,
+          avatar:
+            "https://res.cloudinary.com/dkyco4yqp/image/upload/v1735131879/HYPETIX-removebg-preview_qxyuj5.png",
           isVerify: false,
         },
       });
+      console.log("New Organizer Created:", newOrganizer);
 
       const payload = { id: newOrganizer.id };
       const token = sign(payload, process.env.JWT_KEY!, { expiresIn: "10m" });
-      const link = `http://localhost:3000/verify/${token}`;
+      const link = `${process.env.BASE_URL_FE}/verify/${token}`;
 
       const templatePath = path.join(__dirname, "../templates/verifyUser.hbs");
       const templateSource = fs.readFileSync(templatePath, "utf-8");
       const compiledTemplate = handlebars.compile(templateSource);
-      const html = compiledTemplate({ organizer_name, link });
+      const html = compiledTemplate({ firstName: organizer_name, link });
 
-      // Send verification email using nodemailer
       const transporter = nodemailer.createTransport({
         service: "gmail",
         auth: {
@@ -55,31 +56,29 @@ export class OrgAuthController {
       await transporter.sendMail({
         from: process.env.EMAIL_USER,
         to: email,
-        subject: "Welcome to Event Organizer",
+        subject: "Welcome to the Organizer Platform",
         html,
       });
 
-      res.status(201).send({ message: "Registration Successful √" });
+      res.status(201).send({ message: "Organizer Registration Successful √" });
     } catch (err) {
       console.error(err);
       res.status(400).send(err);
     }
   }
 
+  // Metode untuk login organizer
   async loginOrg(req: Request, res: Response) {
     try {
-      const { data, password } = req.body;
-
+      const { email, password } = req.body;
       const organizer = await prisma.organizer.findFirst({
-        where: {
-          OR: [{ email: data }, { organizer_name: data }],
-        },
+        where: { email },
       });
 
       if (!organizer) throw { message: "Account not found!" };
       if (!organizer.isVerify) throw { message: "Account is not verified!" };
 
-      const isValidPass = await compare(password, organizer.password!);
+      const isValidPass = await compare(password, organizer.password as string);
       if (!isValidPass) throw { message: "Incorrect Password" };
 
       const payload = { id: organizer.id };
@@ -89,7 +88,7 @@ export class OrgAuthController {
         .status(200)
         .cookie("token", token, {
           httpOnly: true,
-          maxAge: 24 * 3600 * 1000, // 24 hours
+          maxAge: 24 * 3600 * 1000,
           path: "/",
           secure: process.env.NODE_ENV === "production",
         })
@@ -99,10 +98,9 @@ export class OrgAuthController {
           data: {
             id: organizer.id,
             email: organizer.email,
-            orgName: organizer.organizer_name,
+            organizer_name: organizer.organizer_name,
             avatar: organizer.avatar,
           },
-          redirectUrl: "/organizer/dashboard",
         });
     } catch (err) {
       console.error(err);
@@ -110,6 +108,7 @@ export class OrgAuthController {
     }
   }
 
+  // Metode untuk verifikasi organizer
   async verifyOrg(req: Request, res: Response) {
     try {
       const { token } = req.params;
@@ -122,7 +121,7 @@ export class OrgAuthController {
         where: { id: verifiedOrganizer.id },
       });
 
-      res.status(200).send({ message: "Verification Successful √" });
+      res.status(200).send({ message: "Organizer Verification Successful √" });
     } catch (err) {
       console.error(err);
       res.status(400).send(err);
