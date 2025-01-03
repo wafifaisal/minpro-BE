@@ -1,21 +1,21 @@
 import { Router } from "express";
-import { OrgAuthController } from "../controllers/org.controller";
+import { OrganizerController } from "../controllers/org.controller";
 
 export class OrgAuthRouter {
-  private orgAuthController: OrgAuthController;
+  private organizerController: OrganizerController;
   private router: Router;
 
   constructor() {
-    this.orgAuthController = new OrgAuthController();
+    this.organizerController = new OrganizerController();
     this.router = Router();
     this.initializeRoutes();
   }
 
   private initializeRoutes() {
-    this.router.post("/organizer", this.orgAuthController.registerOrg);
-    this.router.post("/organizer/login", this.orgAuthController.loginOrg);
+    this.router.post("/organizer/register", this.organizerController.registerOrg);
+    this.router.post("/organizer/login", this.organizerController.loginOrg);
 
-    this.router.patch("/verify/:token", this.orgAuthController.verifyOrg);
+    this.router.patch("/verify/:token", this.organizerController.verifyOrg);
   }
 
   getRouter(): Router {
